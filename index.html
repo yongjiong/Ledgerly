@@ -1165,6 +1165,7 @@
 
   <script>
     const KEY = "ledger_data_v2";
+    const QUICK_TEXT_KEY = "ledger_last_book_text";
     const LEGACY_KEYS = ["ledger_standalone_v1", "ledger_app_v1"];
     const PAGE_SIZE = 5;
     const cats = [
@@ -1192,7 +1193,7 @@
     let statsMode = "month";
     let statsDate = today();
     let activeGroupId = state.aaGroups[0]?.id || "";
-    let bookText = "吃饭25元";
+    let bookText = loadQuickBookText();
     let bookProject = "日常";
     let bookDraft = parseTransaction(bookText);
     let editingTxId = "";
@@ -1311,6 +1312,19 @@
     }
     function projectName(value) {
       return String(value || "").trim() || "日常";
+    }
+    function loadQuickBookText() {
+      try {
+        return localStorage.getItem(QUICK_TEXT_KEY) || "吃饭25元";
+      } catch {
+        return "吃饭25元";
+      }
+    }
+    function saveQuickBookText(value) {
+      try {
+        localStorage.setItem(QUICK_TEXT_KEY, value || "吃饭25元");
+      } catch {
+      }
     }
     function normalizeBookDraft(draft, fallbackRawText = "") {
       return {
@@ -1532,9 +1546,10 @@
         const next = normalizeBookDraft({ ...bookDraft, projectName: document.querySelector("#bookProject").value }, document.querySelector("#bookInput").value);
         if (!next.amount) return;
         state.transactions.unshift({ ...next, id: uid("tx"), createdAt: new Date().toISOString() });
-        bookText = "";
+        bookText = document.querySelector("#bookInput").value.trim() || "吃饭25元";
+        saveQuickBookText(bookText);
         bookProject = "日常";
-        bookDraft = parseTransaction("");
+        bookDraft = parseTransaction(bookText);
         save();
         renderBook();
       });
