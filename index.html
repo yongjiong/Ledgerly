@@ -107,7 +107,7 @@
     }
     .preview {
       display: grid;
-      grid-template-columns: repeat(2,minmax(0,1fr));
+      grid-template-columns: repeat(3,minmax(0,1fr));
       gap: 10px;
     }
     .preview div, .mini-table div, .settlement, .aa-expense, .note {
@@ -115,12 +115,15 @@
       background: #faf7f1;
       border-radius: 8px;
     }
-    .preview div { padding: 12px; display: grid; gap: 6px; }
-    .preview .wide { grid-column: 1 / -1; }
+    .preview div { padding: 12px; display: grid; gap: 6px; min-width: 0; }
     .preview span, .metric span, .mini-table span, .aa-expense em {
       color: #71685e;
       font-size: 13px;
       font-style: normal;
+    }
+    .stats-chart-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: start;
     }
     .list, .group-list, .expense-list, .settlements, .mini-table, .participant-list { display: grid; gap: 10px; }
     .filters {
@@ -329,6 +332,11 @@
     .metric { padding: 16px; display: grid; gap: 8px; }
     .metric strong { font-size: 24px; }
     .chart { min-height: 360px; }
+    .chart svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
     .category-chart {
       display: grid;
       grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
@@ -460,6 +468,126 @@
       box-shadow: inset 4px 0 0 #2e86ab, 0 8px 20px rgba(46,134,171,.10);
     }
     .group.active span { color: #4f5f68; }
+    .aa-fold {
+      display: grid;
+      gap: 10px;
+    }
+    .aa-fold > summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 42px;
+      border: 1px solid #ebe4d9;
+      border-radius: 8px;
+      background: #faf7f1;
+      color: var(--navy);
+      cursor: pointer;
+      list-style: none;
+      padding: 9px 11px;
+    }
+    .aa-fold > summary::-webkit-details-marker { display: none; }
+    .aa-fold > summary::after {
+      content: "展开";
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 400;
+      white-space: nowrap;
+    }
+    .aa-fold[open] > summary::after { content: "收起"; }
+    .aa-fold-title {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+    .aa-fold-title strong {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .aa-fold-title span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 400;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .aa-fold-body {
+      display: grid;
+      gap: 10px;
+    }
+    .aa-entry-panel .aa-fold-body {
+      gap: 16px;
+    }
+    .aa-expense-form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px 12px;
+    }
+    .aa-expense-form .participant-list {
+      grid-column: 1 / -1;
+      margin-top: 4px;
+    }
+    .aa-expense-form button {
+      grid-column: 1 / -1;
+      margin-top: 8px;
+      justify-self: stretch;
+    }
+    .aa-button-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .aa-button-grid button {
+      min-width: 0;
+      white-space: nowrap;
+    }
+    .aa-page-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .aa-page-head button {
+      display: none;
+      flex: 0 0 auto;
+    }
+    .aa-create-page {
+      max-width: 100%;
+    }
+    .aa-summary-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .aa-summary-strip div {
+      border: 1px solid #ebe4d9;
+      background: #faf7f1;
+      border-radius: 8px;
+      padding: 10px;
+      display: grid;
+      gap: 4px;
+    }
+    .aa-summary-strip span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .aa-summary-strip strong {
+      color: var(--navy);
+      font-size: 18px;
+      line-height: 1.15;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .aa-summary-strip div:nth-child(2) strong {
+      color: var(--red);
+    }
+    .aa-panel-role {
+      position: relative;
+    }
     .mini-table div {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
@@ -467,7 +595,15 @@
       padding: 10px 12px;
     }
     .settlement { display: flex; align-items: center; gap: 10px; padding: 14px; }
-    .settlement b { margin-left: auto; color: var(--navy); }
+    .settlement b { margin-left: auto; color: var(--red); }
+    .settlement.primary-settlement {
+      border-color: rgba(228,87,46,.28);
+      background: linear-gradient(135deg, rgba(228,87,46,.12), rgba(255,253,249,.96));
+    }
+    .settlement.primary-settlement strong,
+    .settlement.primary-settlement b {
+      font-size: 18px;
+    }
     .aa-expense {
       display: grid;
       grid-template-columns: 1fr auto auto;
@@ -598,9 +734,48 @@
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
       }
-      .preview { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-      .preview div { min-height: 48px; padding: 8px; gap: 3px; }
-      .preview .wide { grid-column: 1 / -1; }
+      .preview {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 6px;
+      }
+      .preview div,
+      .preview-project {
+        min-height: 46px;
+        padding: 8px;
+        gap: 3px;
+      }
+      .preview-project {
+        display: grid;
+        border: 1px solid #ebe4d9;
+        background: #fff;
+        border-radius: 8px;
+        min-width: 0;
+      }
+      .preview-project input {
+        min-height: 22px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        color: var(--navy);
+        font-size: 13px;
+        font-weight: 700;
+        padding: 0;
+      }
+      .preview div:nth-child(1),
+      .preview div:nth-child(2),
+      .preview .preview-project {
+        grid-column: span 2;
+      }
+      .preview div:nth-child(4),
+      .preview div:nth-child(5),
+      .preview .preview-note {
+        grid-column: span 2;
+      }
+      .preview .preview-note strong {
+        display: block;
+        max-width: 100%;
+      }
       .preview span, .metric span, .mini-table span, .aa-expense em { font-size: 11px; }
       .preview strong {
         min-width: 0;
@@ -623,6 +798,42 @@
       .metric { min-height: 66px; padding: 10px; gap: 5px; }
       .metric strong { font-size: 18px; line-height: 1.15; }
       .chart { min-height: 0; }
+      .stats-chart-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .stats-chart-grid .panel {
+        padding: 9px 10px;
+      }
+      .stats-chart-grid .section-title {
+        align-items: center;
+        flex-direction: row;
+        gap: 8px;
+      }
+      .stats-chart-grid svg {
+        min-width: 0;
+      }
+      .stats-chart-grid .chart:first-child svg {
+        max-height: 150px;
+      }
+      .stats-chart-grid .category-chart {
+        grid-template-columns: 140px minmax(0, 1fr);
+        gap: 10px;
+      }
+      .stats-chart-grid .category-legend {
+        gap: 5px;
+      }
+      .stats-chart-grid .legend-row {
+        grid-template-columns: 10px minmax(0, 1fr) auto;
+        gap: 6px;
+      }
+      .stats-chart-grid .legend-dot {
+        width: 10px;
+        height: 10px;
+      }
+      .stats-chart-grid .legend-row span:last-child {
+        display: inline;
+      }
       .period-switcher { gap: 6px; min-width: 0; }
       .period-switcher .icon {
         flex: 0 0 34px;
@@ -734,6 +945,94 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 6px;
       }
+      .aa-page-head {
+        margin-bottom: 0;
+      }
+      .aa-page-head button {
+        display: inline-flex;
+      }
+      .aa-page-head h2 {
+        font-size: 18px;
+      }
+      .aa-grid {
+        gap: 8px;
+      }
+      .aa-create-panel {
+        display: none;
+      }
+      .aa-entry-panel,
+      .aa-result-panel {
+        border-left-width: 4px;
+        overflow: hidden;
+      }
+      .aa-entry-panel {
+        border-left-color: var(--blue);
+        background: linear-gradient(90deg, rgba(46,134,171,.08), rgba(255,253,249,.96) 34%);
+      }
+      .aa-result-panel {
+        border-left-color: var(--green);
+        background: linear-gradient(90deg, rgba(40,117,60,.08), rgba(255,253,249,.96) 34%);
+      }
+      .aa-entry-panel::before,
+      .aa-result-panel::before {
+        display: none;
+        width: max-content;
+        border-radius: 999px;
+        padding: 3px 8px;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .aa-entry-panel::before {
+        content: "费用录入";
+        background: var(--blue);
+      }
+      .aa-result-panel::before {
+        content: "结算";
+        background: var(--green);
+      }
+      .aa-fold {
+        gap: 7px;
+      }
+      .aa-fold > summary {
+        min-height: 36px;
+        padding: 7px 9px;
+      }
+      .aa-fold-title strong {
+        font-size: 13px;
+      }
+      .aa-fold-title span {
+        font-size: 11px;
+      }
+      .aa-fold-body {
+        gap: 7px;
+      }
+      .aa-expense-form {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px;
+      }
+      .aa-expense-form .participant-list,
+      .aa-expense-form button {
+        grid-column: 1 / -1;
+        margin-top: 0;
+      }
+      .aa-button-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+      }
+      .aa-summary-strip {
+        gap: 6px;
+      }
+      .aa-summary-strip div {
+        padding: 8px;
+      }
+      .aa-summary-strip span {
+        font-size: 11px;
+      }
+      .aa-summary-strip strong {
+        font-size: 15px;
+      }
       .participant-option {
         min-height: 36px;
         padding: 7px 8px;
@@ -742,7 +1041,51 @@
       .note { gap: 4px; padding: 9px; }
       .settings-subsection { gap: 8px; padding-top: 10px; }
       .settings-subtitle h3 { font-size: 14px; }
-      .settings-layout > .panel textarea { min-height: 96px; }
+      .settings-column {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+      }
+      .settings-column .panel,
+      .settings-layout > .panel {
+        min-width: 0;
+      }
+      .settings-column .section-title,
+      .settings-layout > .panel > .section-title,
+      .settings-subtitle {
+        align-items: center;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 6px;
+      }
+      .settings-column .section-title,
+      .settings-layout > .panel > .section-title {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .settings-column .row,
+      .settings-subsection .row {
+        gap: 6px;
+      }
+      .settings-layout > .panel {
+        gap: 8px;
+      }
+      .settings-layout > .panel {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .settings-layout > .panel > .section-title {
+        grid-column: 1 / -1;
+      }
+      .settings-subsection {
+        min-width: 0;
+        padding-top: 0;
+        border-top: 0;
+      }
+      .settings-layout > .panel textarea { min-height: 104px; }
+      .settings-layout > .panel input[type="file"] {
+        min-width: 0;
+      }
       .row {
         display: grid;
         grid-template-columns: 1fr;
@@ -787,7 +1130,7 @@
       <section class="grid two">
         <div class="panel quick-panel">
           <div class="section-title"><h2>快速记账</h2><span>支持今天/昨天、金额、分类关键词</span></div>
-          <textarea placeholder="例如：今天早饭10元、昨天报销80元、7月5日打车32元">今天早饭10元</textarea>
+          <textarea placeholder="例如：吃饭25元、昨天报销80元、7月5日打车32元">吃饭25元</textarea>
           <div class="preview">
             <div><span>日期</span><strong>今天</strong></div>
             <div><span>类型</span><strong>支出</strong></div>
@@ -834,10 +1177,11 @@
     let statsMode = "month";
     let statsDate = today();
     let activeGroupId = state.aaGroups[0]?.id || "";
-    let bookText = "今天早饭10元";
+    let bookText = "吃饭25元";
     let bookProject = "日常";
     let editingTxId = "";
     let txPage = 1;
+    let aaMode = "main";
     let aaExpensePage = 1;
     let projectPage = 1;
     let categoryPage = 1;
@@ -1019,30 +1363,6 @@
       const percent = diff / previous * 100;
       return `${diff >= 0 ? "增加" : "减少"} ¥${money(Math.abs(diff))}（${Math.abs(percent).toFixed(1)}%）`;
     }
-    function monthComparePanel(month) {
-      const previous = previousMonthKey(month);
-      const currentRows = monthRows(month);
-      const previousRows = monthRows(previous);
-      const current = summary(currentRows);
-      const last = summary(previousRows);
-      const categories = categoryCompareRows(currentRows, previousRows);
-      const pageInfo = paginate(categories, comparePage);
-      comparePage = pageInfo.page;
-      return `<details class="panel compare-panel" id="monthCompare">
-        <summary>环比 <span>${esc(month)} vs ${esc(previous)}</span></summary>
-        <div class="compare-grid">
-          ${compareItem("支出", current.expense, last.expense)}
-          ${compareItem("收入", current.income, last.income)}
-          ${compareItem("结余", current.balance, last.balance)}
-        </div>
-        <div class="section-title"><h2>分类变化</h2><span>${categories.length} 类</span></div>
-        ${categories.length ? `<div class="compare-list">${pageInfo.items.map(row => `<div class="compare-row"><strong>${esc(row.name)}</strong><span>本月 ¥${money(row.current)}</span><span>上月 ¥${money(row.previous)}</span><b class="${row.diff > 0 ? "expense" : row.diff < 0 ? "income" : ""}">${row.diff === 0 ? "持平" : `${row.diff > 0 ? "多花" : "少花"} ¥${money(Math.abs(row.diff))}`}</b></div>`).join("")}</div>${paginationHtml("compare", pageInfo, "类")}` : empty("本月和上月都没有分类支出")}
-      </details>`;
-    }
-    function compareItem(label, current, previous) {
-      const diff = current - previous;
-      return `<div class="compare-item"><span>${esc(label)}</span><strong>¥${money(current)}</strong><em class="${diff > 0 ? "expense" : diff < 0 ? "income" : ""}">${esc(changeLabel(current, previous))}</em></div>`;
-    }
     function budgetPanel(title, periodKey, expense, budgetMap) {
       const budget = Number(budgetMap?.[periodKey] || 0);
       if (!budget) return "";
@@ -1122,6 +1442,7 @@
     function renderBook() {
       const value = bookText;
       const p = parseTransaction(value);
+      p.projectName = projectName(bookProject);
       const latest = [...state.transactions].sort((a, b) => b.date.localeCompare(a.date) || txTimeValue(b).localeCompare(txTimeValue(a)));
       const filtered = latest.filter(txMatchesFilters);
       const pageInfo = paginate(filtered, txPage);
@@ -1131,8 +1452,7 @@
         <section class="grid two">
           <div class="panel">
             <div class="section-title"><h2>快速记账</h2><span>支持今天/昨天、金额、分类关键词</span></div>
-            <textarea id="bookInput" placeholder="例如：今天早饭10元、昨天报销80元、7月5日打车32元">${esc(value)}</textarea>
-            <label class="field-label"><strong>活动/项目</strong><input id="bookProject" value="${esc(bookProject)}" placeholder="默认日常；例如：7月上海出行、周末出去玩"><span class="field-hint compact-hint">不是消费分类。平时保持“日常”，旅游、聚会、搬家、AA 活动等特殊事项再填。</span></label>
+            <textarea id="bookInput" placeholder="例如：吃饭25元、昨天报销80元、7月5日打车32元">${esc(value)}</textarea>
             <div id="preview">${previewHtml(p)}</div>
             <button class="primary" id="confirmBook" ${p.amount ? "" : "disabled"}>确认入账</button>
           </div>
@@ -1151,15 +1471,17 @@
       document.querySelector("#bookInput").addEventListener("input", event => {
         bookText = event.target.value;
         const next = parseTransaction(bookText);
-        document.querySelector("#preview").innerHTML = previewHtml(next);
-        document.querySelector("#confirmBook").disabled = !next.amount;
-      });
-      document.querySelector("#bookProject").addEventListener("input", event => {
-        bookProject = event.target.value;
-        const next = parseTransaction(bookText);
         next.projectName = projectName(bookProject);
         document.querySelector("#preview").innerHTML = previewHtml(next);
+        bindBookProjectInput();
+        document.querySelector("#confirmBook").disabled = !next.amount;
       });
+      bindBookProjectInput();
+      function bindBookProjectInput() {
+        document.querySelector("#bookProject").addEventListener("input", event => {
+          bookProject = event.target.value;
+        });
+      }
       document.querySelector("#confirmBook").addEventListener("click", () => {
         const next = parseTransaction(document.querySelector("#bookInput").value);
         next.projectName = projectName(document.querySelector("#bookProject").value);
@@ -1302,13 +1624,40 @@
       ];
       return synced;
     }
+    function parseMembersInput(value) {
+      return [...new Set(String(value || "").split(/[，,\s]+/).map(s => s.trim()).filter(Boolean))];
+    }
+    function updateAAGroupFromForm(group) {
+      if (!group) return false;
+      const name = document.querySelector("#groupName").value.trim();
+      const members = parseMembersInput(document.querySelector("#membersText").value);
+      if (!name || members.length < 2) return false;
+      const previousSelf = group.selfMember || inferSelfMember(group.members || []);
+      group.name = name;
+      group.projectName = projectName(name);
+      group.members = members;
+      group.selfMember = members.includes(previousSelf) ? previousSelf : inferSelfMember(members);
+      group.expenses = (group.expenses || [])
+        .map(expense => ({
+          ...expense,
+          participants: (expense.participants || members).filter(member => members.includes(member))
+        }))
+        .filter(expense => members.includes(expense.payer) && expense.participants.length);
+      aaExpensePage = 1;
+      aaMemberPage = 1;
+      aaSettlementPage = 1;
+      syncAAGroup(group);
+      save();
+      return true;
+    }
     function previewHtml(p) {
       return `<div class="preview">
         <div><span>日期</span><strong>${esc(p.date)}</strong></div>
         <div><span>类型</span><strong>${p.type === "income" ? "收入" : "支出"}</strong></div>
+        <label class="preview-project"><span>活动/项目</span><input id="bookProject" value="${esc(projectName(p.projectName || bookProject))}" placeholder="日常"></label>
         <div><span>金额</span><strong>¥${money(p.amount)}</strong></div>
         <div><span>分类</span>${badge(p.category)}</div>
-        <div class="wide"><span>备注</span><strong>${esc(p.note)}</strong></div>
+        <div class="preview-note"><span>备注</span><strong>${esc(p.note)}</strong></div>
       </div>`;
     }
     function txHtml(t) {
@@ -1366,14 +1715,12 @@
             <div class="metric"><span>支出</span><strong class="expense">¥${money(s.expense)}</strong></div>
             <div class="metric"><span>其中 AA</span><strong class="expense">¥${money(s.aaExpense)}</strong></div>
             <div class="metric"><span>结余</span><strong class="${s.balance >= 0 ? "income" : "expense"}">¥${money(s.balance)}</strong></div>
-            <div class="metric"><span>记录</span><strong>${rows.length} 条</strong></div>
           </div>
           ${statsMode === "month" ? budgetPanel("月度预算", statsDate.slice(0, 7), s.expense, state.budgets) : budgetPanel("年度预算", statsDate.slice(0, 4), s.expense, state.yearBudgets)}
-          <div class="grid two">
+          <div class="grid stats-chart-grid">
             <div class="panel chart"><div class="section-title"><h2>收支趋势</h2><span>${statsMode === "month" ? "按日" : "按月"}</span></div>${barChart(rows)}</div>
             <div class="panel chart"><div class="section-title"><h2>支出分类</h2><span>${categoryData(rows).length} 类</span></div>${pieChart(categoryData(rows))}</div>
           </div>
-          ${statsMode === "month" ? monthComparePanel(statsDate.slice(0, 7)) : ""}
           <div class="panel">
             <div class="section-title"><h2>活动统计</h2><span>${projectData(rows).length} 个活动</span></div>
             ${projectSummary(rows)}
@@ -1381,17 +1728,12 @@
         </section>`;
       const projectPageInfo = paginate(projectData(rows), projectPage);
       const categoryPageInfo = paginate(categoryData(rows), categoryPage);
-      const comparePageInfo = statsMode === "month" ? paginate(categoryCompareRows(monthRows(statsDate.slice(0, 7)), monthRows(previousMonthKey(statsDate.slice(0, 7)))), comparePage) : null;
       bindPagination("project", projectPageInfo, page => {
         projectPage = page;
         renderStats();
       });
       bindPagination("category", categoryPageInfo, page => {
         categoryPage = page;
-        renderStats();
-      });
-      if (comparePageInfo) bindPagination("compare", comparePageInfo, page => {
-        comparePage = page;
         renderStats();
       });
       document.querySelector("#modeMonth").addEventListener("click", () => { statsMode = "month"; projectPage = 1; categoryPage = 1; comparePage = 1; renderStats(); });
@@ -1424,22 +1766,22 @@
     function barChart(rows) {
       const data = trendRows(rows);
       const max = Math.max(1, ...data.map(d => Math.max(d.income, d.expense)));
-      const w = 760, h = 280, pad = 36;
+      const w = 390, h = 150, pad = 24;
       const step = (w - pad * 2) / data.length;
-      const bw = Math.max(3, step * .28);
+      const bw = Math.max(3, step * .34);
+      const chartScale = .8;
       const bars = data.map((d, i) => {
         const x = pad + i * step + step * .18;
-        const ih = d.income / max * (h - pad * 2);
-        const eh = d.expense / max * (h - pad * 2);
+        const ih = d.income / max * (h - pad * 2) * chartScale;
+        const eh = d.expense / max * (h - pad * 2) * chartScale;
         return `<rect x="${x}" y="${h-pad-ih}" width="${bw}" height="${ih}" fill="#3a7d44" rx="3"></rect>
           <rect x="${x+bw+2}" y="${h-pad-eh}" width="${bw}" height="${eh}" fill="#e4572e" rx="3"></rect>
-          ${(statsMode === "year" || i % 3 === 0) ? `<text x="${x}" y="${h-10}" class="bar-label">${esc(d.label)}</text>` : ""}`;
+          ${(statsMode === "year" || i % 5 === 0) ? `<text x="${x}" y="${h-8}" class="bar-label">${esc(d.label)}</text>` : ""}`;
       }).join("");
       return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="收支趋势图">
         <line x1="${pad}" y1="${h-pad}" x2="${w-pad}" y2="${h-pad}" stroke="#d8d2c6"></line>
-        <line x1="${pad}" y1="${pad}" x2="${pad}" y2="${h-pad}" stroke="#d8d2c6"></line>
         ${bars}
-        <text x="${w-150}" y="24" class="bar-label">绿色收入 · 红色支出</text>
+        <text x="${pad}" y="15" class="bar-label">绿收 · 红支</text>
       </svg>`;
     }
     function categoryData(rows) {
@@ -1516,36 +1858,63 @@
         const percent = d.value / total * 100;
         return `<div class="legend-row" title="${esc(d.name)}：¥${money(d.value)}，${percent.toFixed(1)}%"><i class="legend-dot" style="--legend-color:${d.color}"></i><strong>${esc(d.name)}</strong><span>¥${money(d.value)} · ${percent.toFixed(1)}%</span></div>`;
       }).join("");
-      return `<div class="category-chart"><svg viewBox="0 0 220 220" role="img" aria-label="支出分类图">${slices}<circle cx="110" cy="110" r="48" fill="#fffdf9"></circle><text x="110" y="106" text-anchor="middle" class="pie-label">总支出</text><text x="110" y="128" text-anchor="middle" class="pie-label">¥${money(total)}</text></svg><div><div class="category-legend">${legend}</div>${paginationHtml("category", pageInfo, "类")}</div></div>`;
+      return `<div class="category-chart"><svg viewBox="0 0 180 180" role="img" aria-label="支出分类图">${slices.replaceAll('cx="110"', 'cx="90"').replaceAll('cy="110"', 'cy="90"').replaceAll('r="70"', 'r="56"').replaceAll('stroke-width="38"', 'stroke-width="30"').replaceAll('rotate(-90 110 110)', 'rotate(-90 90 90)')}<circle cx="90" cy="90" r="38" fill="#fffdf9"></circle><text x="90" y="86" text-anchor="middle" class="pie-label">支出</text><text x="90" y="106" text-anchor="middle" class="pie-label">¥${money(total)}</text></svg><div><div class="category-legend">${legend}</div>${paginationHtml("category", pageInfo, "类")}</div></div>`;
+    }
+    function desktopOpenAttr() {
+      return typeof window !== "undefined" && Number(window.innerWidth || 0) > 560 ? " open" : "";
     }
     function renderAA() {
+      if (aaMode === "create") {
+        renderAACreate();
+        return;
+      }
       const group = state.aaGroups.find(g => g.id === activeGroupId) || state.aaGroups[0];
       if (group) activeGroupId = group.id;
       const result = group ? calcAA(group) : null;
       const groupPageInfo = paginate(state.aaGroups, aaGroupPage);
       aaGroupPage = groupPageInfo.page;
+      const open = desktopOpenAttr();
       document.querySelector("#app").innerHTML = `
-        <section class="grid aa-grid">
-          <div class="panel">
-            <div class="section-title"><h2>建组</h2><span>至少 2 人</span></div>
-            <input id="groupName" value="周末出去玩" placeholder="活动名称">
-            <input id="membersText" value="我，朋友A" placeholder="成员，用逗号隔开">
-            <button class="primary" id="createGroup">创建活动</button>
-            ${group ? `<button id="syncGroup">刷新到记账和统计</button>` : ""}
-            ${group ? `<button class="danger" id="deleteGroup">删除当前活动</button>` : ""}
-            ${group ? `<label class="field-label">我的成员身份<select id="selfMemberSelect">${group.members.map(m => `<option value="${esc(m)}" ${m === (group.selfMember || inferSelfMember(group.members)) ? "selected" : ""}>${esc(m)}</option>`).join("")}</select></label>` : ""}
-            <div class="group-list">${groupPageInfo.items.map(g => `<button class="group ${group?.id === g.id ? "active" : ""}" data-group="${esc(g.id)}"><strong>${esc(g.name)}</strong><span>${esc(projectName(g.projectName || g.name))} · ${esc(g.members.join("、"))}</span></button>`).join("")}</div>
-            ${paginationHtml("aaGroup", groupPageInfo, "个活动")}
+        <section class="grid">
+          <div class="aa-page-head">
+            <h2>AA结算</h2>
+            <button class="primary" id="openAaCreate">创建活动</button>
           </div>
-          <div class="panel">
-            <div class="section-title"><h2>录入费用</h2><span>${group ? esc(group.name) : "先创建活动"}</span></div>
-            ${group ? expenseForm(group) : empty("还没有 AA 活动")}
+          <div class="grid aa-grid">
+          <div class="panel aa-panel-role aa-create-panel">
+            <details class="aa-fold aa-create"${open}>
+              <summary><span class="aa-fold-title"><strong>创建活动</strong><span>${group ? esc(group.name) : "活动管理"}</span></span></summary>
+              <div class="aa-fold-body">
+                <input id="groupName" value="${esc(group?.name || "周末出去玩")}" placeholder="活动名称">
+                <input id="membersText" value="${esc(group ? group.members.join("，") : "我，朋友A")}" placeholder="成员，用逗号隔开">
+                <div class="aa-button-grid">
+                  <button class="primary" id="createGroup">创建活动</button>
+                  ${group ? `<button id="updateGroup">保存修改</button>` : ""}
+                  ${group ? `<button id="syncGroup">刷新统计</button>` : ""}
+                  ${group ? `<button class="danger" id="deleteGroup">删除当前活动</button>` : ""}
+                </div>
+                ${group ? `<label class="field-label">我的成员身份<select id="selfMemberSelect">${group.members.map(m => `<option value="${esc(m)}" ${m === (group.selfMember || inferSelfMember(group.members)) ? "selected" : ""}>${esc(m)}</option>`).join("")}</select></label>` : ""}
+                <div class="group-list">${groupPageInfo.items.map(g => `<button class="group ${group?.id === g.id ? "active" : ""}" data-group="${esc(g.id)}"><strong>${esc(g.name)}</strong><span>${esc(projectName(g.projectName || g.name))} · ${esc(g.members.join("、"))}</span></button>`).join("")}</div>
+                ${paginationHtml("aaGroup", groupPageInfo, "个活动")}
+              </div>
+            </details>
           </div>
-          <div class="panel">
+          <div class="panel aa-panel-role aa-entry-panel">
+            ${group ? `<details class="aa-fold aa-entry" open>
+              <summary><span class="aa-fold-title"><strong>费用录入</strong><span>${esc(group.name)} · ${group.members.length} 人</span></span></summary>
+              <div class="aa-fold-body">${expenseForm(group)}</div>
+            </details>` : `<div class="section-title"><h2>费用录入</h2><span>先创建活动</span></div>${empty("还没有 AA 活动")}`}
+          </div>
+          <div class="panel aa-panel-role aa-result-panel">
             <div class="section-title"><h2>结算</h2><span>最少笔数</span></div>
             ${group ? aaResult(group, result) : empty("暂无结算")}
           </div>
+          </div>
         </section>`;
+      document.querySelector("#openAaCreate").addEventListener("click", () => {
+        aaMode = "create";
+        renderAA();
+      });
       document.querySelector("#createGroup").addEventListener("click", () => {
         const members = document.querySelector("#membersText").value.split(/[，,\s]+/).map(s => s.trim()).filter(Boolean);
         const name = document.querySelector("#groupName").value.trim();
@@ -1563,6 +1932,10 @@
         group.selfMember = document.querySelector("#selfMemberSelect").value;
         syncAAGroup(group);
         save();
+        renderAA();
+      });
+      document.querySelector("#updateGroup")?.addEventListener("click", () => {
+        if (!updateAAGroupFromForm(group)) return;
         renderAA();
       });
       document.querySelectorAll("[data-group]").forEach(btn => btn.addEventListener("click", () => {
@@ -1632,30 +2005,128 @@
         });
       }
     }
+    function renderAACreate() {
+      const group = state.aaGroups.find(g => g.id === activeGroupId) || state.aaGroups[0];
+      if (group) activeGroupId = group.id;
+      const groupPageInfo = paginate(state.aaGroups, aaGroupPage);
+      aaGroupPage = groupPageInfo.page;
+      document.querySelector("#app").innerHTML = `
+        <section class="grid aa-create-page">
+          <div class="aa-page-head">
+            <h2>创建活动</h2>
+            <button id="backToAa">返回</button>
+          </div>
+          <div class="panel">
+            <div class="section-title"><h2>活动设置</h2><span>${group ? esc(group.name) : "未创建"}</span></div>
+            <input id="groupName" value="${esc(group?.name || "周末出去玩")}" placeholder="活动名称">
+            <input id="membersText" value="${esc(group ? group.members.join("，") : "我，朋友A")}" placeholder="成员，用逗号隔开">
+            <div class="aa-button-grid">
+              <button class="primary" id="createGroup">创建活动</button>
+              ${group ? `<button id="updateGroup">保存修改</button>` : ""}
+              ${group ? `<button id="syncGroup">刷新统计</button>` : ""}
+              ${group ? `<button class="danger" id="deleteGroup">删除当前活动</button>` : ""}
+            </div>
+            ${group ? `<label class="field-label">我的成员身份<select id="selfMemberSelect">${group.members.map(m => `<option value="${esc(m)}" ${m === (group.selfMember || inferSelfMember(group.members)) ? "selected" : ""}>${esc(m)}</option>`).join("")}</select></label>` : ""}
+          </div>
+          <div class="panel">
+            <div class="section-title"><h2>活动列表</h2><span>${state.aaGroups.length} 个活动</span></div>
+            <div class="group-list">${groupPageInfo.items.map(g => `<button class="group ${group?.id === g.id ? "active" : ""}" data-group="${esc(g.id)}"><strong>${esc(g.name)}</strong><span>${esc(projectName(g.projectName || g.name))} · ${esc(g.members.join("、"))}</span></button>`).join("")}</div>
+            ${paginationHtml("aaGroup", groupPageInfo, "个活动")}
+          </div>
+        </section>`;
+      document.querySelector("#backToAa").addEventListener("click", () => {
+        aaMode = "main";
+        renderAA();
+      });
+      document.querySelector("#createGroup").addEventListener("click", () => {
+        const members = document.querySelector("#membersText").value.split(/[，,\s]+/).map(s => s.trim()).filter(Boolean);
+        const name = document.querySelector("#groupName").value.trim();
+        if (!name || members.length < 2) return;
+        const selfMember = inferSelfMember(members);
+        const g = { id: uid("aa"), name, projectName: projectName(name), selfMember, members, expenses: [] };
+        state.aaGroups.unshift(g);
+        activeGroupId = g.id;
+        aaGroupPage = 1;
+        aaMode = "main";
+        save();
+        renderAA();
+      });
+      document.querySelector("#selfMemberSelect")?.addEventListener("change", () => {
+        if (!group) return;
+        group.selfMember = document.querySelector("#selfMemberSelect").value;
+        syncAAGroup(group);
+        save();
+        renderAA();
+      });
+      document.querySelector("#updateGroup")?.addEventListener("click", () => {
+        if (!updateAAGroupFromForm(group)) return;
+        renderAA();
+      });
+      document.querySelectorAll("[data-group]").forEach(btn => btn.addEventListener("click", () => {
+        activeGroupId = btn.dataset.group;
+        aaExpensePage = 1;
+        aaMemberPage = 1;
+        aaSettlementPage = 1;
+        renderAA();
+      }));
+      document.querySelector("#syncGroup")?.addEventListener("click", () => {
+        if (!group) return;
+        syncAAGroup(group);
+        save();
+        aaMode = "main";
+        renderAA();
+      });
+      document.querySelector("#deleteGroup")?.addEventListener("click", () => {
+        if (!group || !confirm(`确定删除“${group.name}”吗？同步到记账的 AA 支出也会一起删除。`)) return;
+        state.aaGroups = state.aaGroups.filter(g => g.id !== group.id);
+        state.transactions = state.transactions.filter(t => t.aaGroupId !== group.id);
+        activeGroupId = state.aaGroups[0]?.id || "";
+        aaGroupPage = 1;
+        save();
+        renderAA();
+      });
+      bindPagination("aaGroup", groupPageInfo, page => {
+        aaGroupPage = page;
+        renderAA();
+      });
+    }
     function expenseForm(group) {
-      return `<select id="payer">${group.members.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join("")}</select>
+      return `<div class="aa-expense-form"><select id="payer">${group.members.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join("")}</select>
         <input id="aaDate" type="date" value="${today()}">
         <input id="aaAmount" type="number" min="0" step="0.01" value="100" placeholder="金额">
         <input id="aaNote" value="吃饭" placeholder="备注，例如吃饭">
         <div class="participant-list" role="group" aria-label="参与人">
           ${group.members.map(m => `<label class="participant-option"><input type="checkbox" data-participant="${esc(m)}" checked><span>${esc(m)}</span></label>`).join("")}
         </div>
-        <button class="primary" id="addExpense">加入 AA</button>`;
+        <button class="primary" id="addExpense">加入 AA</button></div>`;
     }
     function aaResult(group, result) {
       const memberPageInfo = paginate(group.members, aaMemberPage);
       aaMemberPage = memberPageInfo.page;
-      const table = `<div class="mini-table">${memberPageInfo.items.map(m => `<div><span>${esc(m)}</span><span>已付 ¥${money(result.paid[m])}</span><span>应付 ¥${money(result.shouldPay[m])}</span></div>`).join("")}</div>${paginationHtml("aaMember", memberPageInfo, "人")}`;
       const synced = aaSyncRows(group);
       const syncedTotal = synced.reduce((sum, item) => sum + Number(item.amount), 0);
-      const syncNote = `<div class="note"><strong>已生成我的 AA 均摊支出</strong><span>同步位置：记账记录、统计页、活动统计</span><span>${synced.length} 条 ${esc(group.selfMember || inferSelfMember(group.members || []))} 的 AA 支出，合计 ¥${money(syncedTotal)}</span></div>`;
+      const totalPaid = group.expenses.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+      const selfName = group.selfMember || inferSelfMember(group.members || []);
+      const summary = `<div class="aa-summary-strip">
+        <div><span>总费用</span><strong>¥${money(totalPaid)}</strong></div>
+        <div><span>我的均摊</span><strong>¥${money(syncedTotal)}</strong></div>
+        <div><span>成员</span><strong>${group.members.length} 人</strong></div>
+      </div>`;
+      const table = `<details class="aa-fold aa-detail-fold"${desktopOpenAttr()}>
+        <summary><span class="aa-fold-title"><strong>成员均摊</strong><span>${group.members.length} 人 · 已付 / 应付</span></span></summary>
+        <div class="aa-fold-body"><div class="mini-table">${memberPageInfo.items.map(m => `<div><span>${esc(m)}</span><span>已付 ¥${money(result.paid[m])}</span><span>应付 ¥${money(result.shouldPay[m])}</span></div>`).join("")}</div>${paginationHtml("aaMember", memberPageInfo, "人")}</div>
+      </details>`;
+      const syncNote = `<div class="note"><strong>已生成我的 AA 均摊支出</strong><span>同步位置：记账记录、统计页、活动统计</span><span>${synced.length} 条 ${esc(selfName)} 的 AA 支出，合计 ¥${money(syncedTotal)}</span></div>`;
       const settlementPageInfo = paginate(result.settlements, aaSettlementPage);
       aaSettlementPage = settlementPageInfo.page;
-      const settlements = `<div class="settlements">${result.settlements.length ? settlementPageInfo.items.map(r => `<div class="settlement"><strong>${esc(r.from)}</strong><span>给</span><strong>${esc(r.to)}</strong><b>¥${money(r.amount)}</b></div>`).join("") : empty("已经结清")}</div>${paginationHtml("aaSettlement", settlementPageInfo, "笔")}`;
+      const settlements = `<div class="settlements">${result.settlements.length ? settlementPageInfo.items.map((r, index) => `<div class="settlement ${index === 0 ? "primary-settlement" : ""}"><strong>${esc(r.from)}</strong><span>给</span><strong>${esc(r.to)}</strong><b>¥${money(r.amount)}</b></div>`).join("") : empty("已经结清")}</div>${paginationHtml("aaSettlement", settlementPageInfo, "笔")}`;
       const expensePageInfo = paginate(group.expenses, aaExpensePage);
       aaExpensePage = expensePageInfo.page;
-      const expenses = `<div class="expense-list">${expensePageInfo.items.map(e => `<div class="aa-expense"><span>${esc(e.date || today())} · ${esc(e.payer)} 付了 ¥${money(e.amount)}</span><strong>${esc(e.note)}</strong><button class="danger" data-del-aa-expense="${esc(e.id)}">删除</button><em>${esc((e.participants || group.members).join("、"))}</em></div>`).join("")}</div>${paginationHtml("aaExpense", expensePageInfo)}`;
-      return table + syncNote + settlements + expenses;
+      const expenses = `<details class="aa-fold aa-detail-fold">
+        <summary><span class="aa-fold-title"><strong>费用记录</strong><span>${group.expenses.length} 条 · 可删除</span></span></summary>
+        <div class="aa-fold-body"><div class="expense-list">${expensePageInfo.items.map(e => `<div class="aa-expense"><span>${esc(e.date || today())} · ${esc(e.payer)} 付了 ¥${money(e.amount)}</span><strong>${esc(e.note)}</strong><button class="danger" data-del-aa-expense="${esc(e.id)}">删除</button><em>${esc((e.participants || group.members).join("、"))}</em></div>`).join("")}</div>${paginationHtml("aaExpense", expensePageInfo)}</div>
+      </details>`;
+      return summary + settlements + syncNote + table + expenses;
     }
     function renderSettings() {
       const budgetRows = Object.entries(state.budgets || {}).sort();
@@ -1685,17 +2156,17 @@
             </div>
           </div>
           <div class="panel">
-            <div class="section-title"><h2>数据导入导出</h2><span>备份 / 恢复 / 表格导入</span></div>
+            <div class="section-title"><h2>数据导入导出</h2><span>备份 / 导入</span></div>
             <div class="settings-subsection">
-              <div class="settings-subtitle"><h3>导出备份</h3><span class="muted">保存在本机</span></div>
+              <div class="settings-subtitle"><h3>导出备份</h3></div>
               <div class="row"><button class="primary" id="exportJson">导出 JSON</button><button id="exportCsv">导出 CSV</button></div>
-              <div class="note"><strong>当前数据</strong><span>${state.transactions.length} 条记账记录</span><span>${state.aaGroups.length} 个 AA 活动</span><span>存储 key：${KEY}</span></div>
+              <div class="note"><strong>当前</strong><span>${state.transactions.length} 笔记账 · AA ${state.aaGroups.length} 个</span></div>
             </div>
             <div class="settings-subsection">
-              <div class="settings-subtitle"><h3>导入 / 恢复</h3><span class="muted">JSON / CSV 表格</span></div>
-              <textarea id="importText" placeholder="粘贴之前导出的 JSON，或粘贴 CSV / Excel 表格。支持日期/交易时间、类型/收支、金额/金额(元)/借方金额/贷方金额、分类/交易分类、备注/摘要/商品说明等列名。"></textarea>
+              <div class="settings-subtitle"><h3>导入 / 恢复</h3></div>
+              <textarea id="importText" placeholder="粘贴 JSON 或 CSV / Excel 表格"></textarea>
               <input id="csvFile" type="file" accept=".csv,.txt,text/csv">
-              <div class="row"><button class="primary" id="mergeImport">导入 JSON</button><button id="importCsv">导入表格 CSV</button><button class="danger" id="clearAll">清空数据</button></div>
+              <div class="row"><button class="primary" id="mergeImport">导入 JSON</button><button id="importCsv">导入 CSV</button><button class="danger" id="clearAll">清空数据</button></div>
               <p class="message" id="msg"></p>
             </div>
           </div>
