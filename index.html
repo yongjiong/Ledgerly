@@ -77,6 +77,7 @@
     h2 { margin: 0; font-size: 18px; color: var(--navy); }
     p { margin: 8px 0 0; color: var(--muted); }
     .tabs, .segmented, .row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .mobile-label { display: none; }
     .tabs button, .segmented button { min-width: 72px; }
     .active, .primary {
       background: var(--navy);
@@ -110,16 +111,34 @@
       grid-template-columns: repeat(3,minmax(0,1fr));
       gap: 10px;
     }
-    .preview div, .mini-table div, .settlement, .aa-expense, .note {
+    .preview div, .preview-field, .mini-table div, .settlement, .aa-expense, .note {
       border: 1px solid #ebe4d9;
       background: #faf7f1;
       border-radius: 8px;
     }
-    .preview div { padding: 12px; display: grid; gap: 6px; min-width: 0; }
+    .preview div, .preview-field { padding: 12px; display: grid; gap: 6px; min-width: 0; }
     .preview span, .metric span, .mini-table span, .aa-expense em {
       color: #71685e;
       font-size: 13px;
       font-style: normal;
+    }
+    .preview-field input,
+    .preview-field select {
+      width: 100%;
+      min-width: 0;
+      min-height: 28px;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      color: var(--navy);
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .preview-field input:focus,
+    .preview-field select:focus {
+      box-shadow: none;
     }
     .stats-chart-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -739,42 +758,25 @@
         gap: 6px;
       }
       .preview div,
-      .preview-project {
+      .preview-field {
         min-height: 46px;
         padding: 8px;
         gap: 3px;
       }
-      .preview-project {
-        display: grid;
-        border: 1px solid #ebe4d9;
-        background: #fff;
-        border-radius: 8px;
-        min-width: 0;
-      }
-      .preview-project input {
+      .preview-field input,
+      .preview-field select {
         min-height: 22px;
-        border: 0;
-        border-radius: 0;
-        background: transparent;
-        box-shadow: none;
-        color: var(--navy);
         font-size: 13px;
-        font-weight: 700;
-        padding: 0;
       }
-      .preview div:nth-child(1),
-      .preview div:nth-child(2),
-      .preview .preview-project {
+      .preview .preview-field:nth-child(1),
+      .preview .preview-field:nth-child(2),
+      .preview .preview-field:nth-child(3) {
         grid-column: span 2;
       }
-      .preview div:nth-child(4),
-      .preview div:nth-child(5),
-      .preview .preview-note {
+      .preview .preview-field:nth-child(4),
+      .preview .preview-field:nth-child(5),
+      .preview .preview-field:nth-child(6) {
         grid-column: span 2;
-      }
-      .preview .preview-note strong {
-        display: block;
-        max-width: 100%;
       }
       .preview span, .metric span, .mini-table span, .aa-expense em { font-size: 11px; }
       .preview strong {
@@ -1091,6 +1093,19 @@
         grid-template-columns: 1fr;
         gap: 7px;
       }
+      .budget-action-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .budget-action-row button {
+        min-width: 0;
+        white-space: nowrap;
+      }
+      .desktop-label {
+        display: none;
+      }
+      .mobile-label {
+        display: inline;
+      }
       .pagination {
         justify-content: space-between;
         gap: 6px;
@@ -1179,6 +1194,7 @@
     let activeGroupId = state.aaGroups[0]?.id || "";
     let bookText = "吃饭25元";
     let bookProject = "日常";
+    let bookDraft = parseTransaction(bookText);
     let editingTxId = "";
     let txPage = 1;
     let aaMode = "main";
@@ -1295,6 +1311,17 @@
     }
     function projectName(value) {
       return String(value || "").trim() || "日常";
+    }
+    function normalizeBookDraft(draft, fallbackRawText = "") {
+      return {
+        date: draft.date || today(),
+        type: draft.type === "income" ? "income" : "expense",
+        amount: Number(draft.amount) || 0,
+        category: String(draft.category || "其他").trim() || "其他",
+        note: String(draft.note || "").trim() || "未命名",
+        rawText: draft.rawText || fallbackRawText,
+        projectName: projectName(draft.projectName)
+      };
     }
     function inferSelfMember(members) {
       return members.includes("我") ? "我" : members[0];
@@ -1441,7 +1468,7 @@
     }
     function renderBook() {
       const value = bookText;
-      const p = parseTransaction(value);
+      const p = { ...bookDraft };
       p.projectName = projectName(bookProject);
       const latest = [...state.transactions].sort((a, b) => b.date.localeCompare(a.date) || txTimeValue(b).localeCompare(txTimeValue(a)));
       const filtered = latest.filter(txMatchesFilters);
@@ -1471,24 +1498,43 @@
       document.querySelector("#bookInput").addEventListener("input", event => {
         bookText = event.target.value;
         const next = parseTransaction(bookText);
-        next.projectName = projectName(bookProject);
+        bookDraft = next;
+        bookProject = projectName(next.projectName);
+        next.projectName = bookProject;
         document.querySelector("#preview").innerHTML = previewHtml(next);
-        bindBookProjectInput();
+        bindBookDraftInputs();
         document.querySelector("#confirmBook").disabled = !next.amount;
       });
-      bindBookProjectInput();
-      function bindBookProjectInput() {
+      bindBookDraftInputs();
+      function bindBookDraftInputs() {
+        document.querySelector("#bookDate").addEventListener("input", event => {
+          bookDraft.date = event.target.value;
+        });
+        document.querySelector("#bookType").addEventListener("change", event => {
+          bookDraft.type = event.target.value;
+        });
         document.querySelector("#bookProject").addEventListener("input", event => {
           bookProject = event.target.value;
+          bookDraft.projectName = event.target.value;
+        });
+        document.querySelector("#bookAmount").addEventListener("input", event => {
+          bookDraft.amount = event.target.value;
+          document.querySelector("#confirmBook").disabled = !(Number(event.target.value) > 0);
+        });
+        document.querySelector("#bookCategory").addEventListener("input", event => {
+          bookDraft.category = event.target.value;
+        });
+        document.querySelector("#bookNote").addEventListener("input", event => {
+          bookDraft.note = event.target.value;
         });
       }
       document.querySelector("#confirmBook").addEventListener("click", () => {
-        const next = parseTransaction(document.querySelector("#bookInput").value);
-        next.projectName = projectName(document.querySelector("#bookProject").value);
+        const next = normalizeBookDraft({ ...bookDraft, projectName: document.querySelector("#bookProject").value }, document.querySelector("#bookInput").value);
         if (!next.amount) return;
         state.transactions.unshift({ ...next, id: uid("tx"), createdAt: new Date().toISOString() });
         bookText = "";
         bookProject = "日常";
+        bookDraft = parseTransaction("");
         save();
         renderBook();
       });
@@ -1652,12 +1698,12 @@
     }
     function previewHtml(p) {
       return `<div class="preview">
-        <div><span>日期</span><strong>${esc(p.date)}</strong></div>
-        <div><span>类型</span><strong>${p.type === "income" ? "收入" : "支出"}</strong></div>
-        <label class="preview-project"><span>活动/项目</span><input id="bookProject" value="${esc(projectName(p.projectName || bookProject))}" placeholder="日常"></label>
-        <div><span>金额</span><strong>¥${money(p.amount)}</strong></div>
-        <div><span>分类</span>${badge(p.category)}</div>
-        <div class="preview-note"><span>备注</span><strong>${esc(p.note)}</strong></div>
+        <label class="preview-field"><span>日期</span><input id="bookDate" type="date" value="${esc(p.date || today())}"></label>
+        <label class="preview-field"><span>类型</span><select id="bookType"><option value="expense"${p.type === "income" ? "" : " selected"}>支出</option><option value="income"${p.type === "income" ? " selected" : ""}>收入</option></select></label>
+        <label class="preview-field"><span>活动/项目</span><input id="bookProject" value="${esc(projectName(p.projectName || bookProject))}" placeholder="日常"></label>
+        <label class="preview-field"><span>金额</span><input id="bookAmount" type="number" min="0" step="0.01" value="${p.amount ? esc(p.amount) : ""}" placeholder="0.00"></label>
+        <label class="preview-field"><span>分类</span><input id="bookCategory" value="${esc(p.category || "")}" placeholder="餐饮"></label>
+        <label class="preview-field preview-note"><span>备注</span><input id="bookNote" value="${esc(p.note || "")}" placeholder="未命名"></label>
       </div>`;
     }
     function txHtml(t) {
@@ -2142,16 +2188,16 @@
               <div class="section-title"><h2>月度预算</h2><span>超支提醒</span></div>
               <input id="budgetMonth" type="month" value="${today().slice(0, 7)}">
               <input id="budgetAmount" type="number" min="0" step="0.01" value="${esc(state.budgets?.[today().slice(0, 7)] || "")}" placeholder="月预算金额，例如 3000">
-              <div class="row"><button class="primary" id="saveBudget">保存预算</button><button id="deleteBudget">删除本月预算</button></div>
-              <div class="note"><strong>已设置月预算</strong>${budgetRows.length ? budgetPageInfo.items.map(([month, amount]) => `<span>${esc(month)}：¥${money(amount)}</span>`).join("") : "<span>暂无预算</span>"}</div>
+              <div class="row budget-action-row"><button class="primary" id="saveBudget"><span class="desktop-label">保存预算</span><span class="mobile-label">保存</span></button><button id="deleteBudget"><span class="desktop-label">删除本月预算</span><span class="mobile-label">删除</span></button></div>
+              <div class="note">${budgetRows.length ? `<strong>已设置月预算</strong>${budgetPageInfo.items.map(([month, amount]) => `<span>${esc(month)}：¥${money(amount)}</span>`).join("")}` : "<strong>暂无预算</strong>"}</div>
               ${paginationHtml("budget", budgetPageInfo, "个月")}
             </div>
             <div class="panel">
               <div class="section-title"><h2>年度预算</h2><span>年度支出上限</span></div>
               <input id="budgetYear" type="number" min="2000" max="2100" value="${today().slice(0, 4)}" placeholder="年份，例如 2026">
               <input id="yearBudgetAmount" type="number" min="0" step="0.01" value="${esc(state.yearBudgets?.[today().slice(0, 4)] || "")}" placeholder="年预算金额，例如 36000">
-              <div class="row"><button class="primary" id="saveYearBudget">保存预算</button><button id="deleteYearBudget">删除本年预算</button></div>
-              <div class="note"><strong>已设置年预算</strong>${yearBudgetRows.length ? yearBudgetPageInfo.items.map(([year, amount]) => `<span>${esc(year)}：¥${money(amount)}</span>`).join("") : "<span>暂无预算</span>"}</div>
+              <div class="row budget-action-row"><button class="primary" id="saveYearBudget"><span class="desktop-label">保存预算</span><span class="mobile-label">保存</span></button><button id="deleteYearBudget"><span class="desktop-label">删除本年预算</span><span class="mobile-label">删除</span></button></div>
+              <div class="note">${yearBudgetRows.length ? `<strong>已设置年预算</strong>${yearBudgetPageInfo.items.map(([year, amount]) => `<span>${esc(year)}：¥${money(amount)}</span>`).join("")}` : "<strong>暂无预算</strong>"}</div>
               ${paginationHtml("yearBudget", yearBudgetPageInfo, "个年份")}
             </div>
           </div>
